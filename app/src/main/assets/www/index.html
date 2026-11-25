@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f1a">
+<title>NBA en Colores</title>
+<style>
+:root{--bg:#0b0f1a;--card:#141a2a;--card2:#1b2338;--txt:#eef2ff;--mut:#8b96b5;--a1:#1d428a;--a2:#c8102e;--live:#ff3b3b;--ok:#22c55e;--warn:#facc15;--r:16px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,select{font:inherit;color:var(--txt);background:var(--card2);border:1px solid #2a3452;border-radius:12px;padding:11px 12px;width:100%}
+a{color:inherit}
+header{position:sticky;top:0;z-index:20;padding:12px 16px 10px;padding-top:calc(12px + env(safe-area-inset-top));background:linear-gradient(120deg,var(--a1),var(--a2));display:flex;align-items:center;gap:10px;box-shadow:0 4px 18px #0007}
+header h1{font-size:20px;margin:0;font-weight:900;letter-spacing:.5px;flex:1;text-shadow:0 2px 6px #0006}
+header h1 span{font-weight:400;opacity:.85}
+.ib{width:40px;height:40px;border-radius:12px;background:#ffffff22;display:grid;place-items:center;font-size:19px}
+main{padding:14px 14px 100px;max-width:900px;margin:0 auto}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:#0e1322f2;backdrop-filter:blur(10px);display:flex;border-top:1px solid #222b45;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11px;color:var(--mut)}
+nav button b{font-size:21px;line-height:1;filter:grayscale(1);opacity:.7}
+nav button.on{color:#fff}
+nav button.on b{filter:none;opacity:1;transform:scale(1.12)}
+.row{display:flex;gap:8px;align-items:center}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:8px 14px;border-radius:999px;background:var(--card2);color:var(--mut);font-weight:600;font-size:13px;white-space:nowrap}
+.chip.on{background:#fff;color:#0b0f1a}
+.chip small{opacity:.7;margin-left:4px}
+h2{font-size:17px;margin:18px 2px 10px}
+.mut{color:var(--mut)}
+.card{background:var(--card);border-radius:var(--r);overflow:hidden;margin-bottom:12px;box-shadow:0 2px 10px #0004}
+.game{position:relative}
+.game .stripe{display:flex;height:6px}
+.game .stripe i{flex:1}
+.game .body{padding:12px 14px}
+.team{display:flex;align-items:center;gap:10px;padding:5px 0}
+.team .nm{flex:1;min-width:0}
+.team .nm b{display:block;font-size:15px}
+.team .nm small{color:var(--mut);font-size:12px}
+.team .sc{font-size:28px;font-weight:900;font-variant-numeric:tabular-nums}
+.team.lose .sc,.team.lose .nm b{opacity:.5}
+.st{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12px;color:var(--mut);gap:8px}
+.pill{padding:4px 9px;border-radius:999px;font-weight:800;font-size:11px;letter-spacing:.4px}
+.pill.live{background:var(--live);color:#fff;animation:pulse 1.4s infinite}
+.pill.fin{background:#3a4360;color:#cfd6ea}
+.pill.pre{background:#2563eb;color:#fff}
+@keyframes pulse{50%{opacity:.6}}
+.leaders{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.leaders div{background:var(--card2);border-radius:10px;padding:6px 8px;font-size:11px;color:var(--mut)}
+.leaders b{display:block;color:var(--txt);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.datebar{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.datebar .chips{flex:1;padding:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:10px}
+.tcell{background:var(--card);border-radius:14px;padding:12px 6px 10px;text-align:center;font-size:12px;font-weight:700;position:relative;overflow:hidden}
+.tcell::before{content:"";position:absolute;inset:0 0 auto 0;height:44%;background:var(--c1);opacity:.35}
+.tcell svg{position:relative}
+.tcell div{position:relative;margin-top:6px;line-height:1.2}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 6px;text-align:center;white-space:nowrap}
+th{color:var(--mut);font-weight:600;font-size:11px}
+td:first-child,th:first-child{text-align:left}
+tbody tr{border-top:1px solid #222b45}
+.tw{overflow-x:auto}
+.seed{display:inline-flex;align-items:center;gap:8px}
+.seed i{width:4px;height:26px;border-radius:2px}
+.zone-p{box-shadow:inset 3px 0 0 var(--ok)}
+.zone-i{box-shadow:inset 3px 0 0 var(--warn)}
+.zone-o{box-shadow:inset 3px 0 0 #4b5574}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--mut);margin:8px 2px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.hero{border-radius:var(--r);padding:18px;display:flex;gap:14px;align-items:center;margin-bottom:14px;position:relative;overflow:hidden}
+.hero h3{margin:0;font-size:22px}
+.hero p{margin:4px 0 0;opacity:.9}
+.list .it{display:flex;gap:12px;align-items:center;padding:11px 14px;border-top:1px solid #222b45}
+.list .it:first-child{border-top:0}
+.num{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:900;font-size:13px;flex:none}
+.news img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#222}
+.news .body{padding:12px 14px}
+.news h4{margin:0 0 6px;font-size:16px}
+.news p{margin:0;color:var(--mut);font-size:13px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:12px;background:#fff;color:#0b0f1a;font-weight:800}
+.btn.g{background:var(--card2);color:var(--txt)}
+.btn.s{padding:7px 12px;font-size:13px}
+.btn.full{width:100%}
+.ch{display:flex;align-items:center;gap:12px;padding:10px 12px;border-top:1px solid #222b45}
+.ch:first-child{border-top:0}
+.ch img,.ch .ph{width:46px;height:46px;border-radius:10px;object-fit:contain;background:#0b0f1a;flex:none;display:grid;place-items:center;font-size:20px}
+.ch .nm{flex:1;min-width:0}
+.ch .nm b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+.ch .nm small{color:var(--mut);font-size:11px}
+.star{font-size:20px;opacity:.35}
+.star.on{opacity:1}
+.empty{text-align:center;padding:40px 20px;color:var(--mut)}
+.empty b{display:block;font-size:44px;margin-bottom:8px}
+.modal{position:fixed;inset:0;z-index:50;background:var(--bg);overflow-y:auto;display:none;padding-bottom:40px}
+.modal.on{display:block}
+.mhead{position:sticky;top:0;z-index:2;display:flex;align-items:center;gap:10px;padding:12px 14px;padding-top:calc(12px + env(safe-area-inset-top));background:#0e1322f2;backdrop-filter:blur(10px)}
+.mhead h3{flex:1;margin:0;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mbody{padding:14px;max-width:900px;margin:0 auto}
+.player{position:fixed;inset:0;z-index:60;background:#000;display:none;flex-direction:column}
+.player.on{display:flex}
+.player video{width:100%;flex:1;background:#000;min-height:0}
+.player .bar{display:flex;align-items:center;gap:10px;padding:10px 14px;padding-top:calc(10px + env(safe-area-inset-top));background:#111}
+.player .bar b{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.player .msg{position:absolute;left:0;right:0;top:45%;text-align:center;color:#ccc;padding:20px;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#fff;color:#000;padding:10px 16px;border-radius:12px;font-weight:700;z-index:99;opacity:0;transition:.3s;pointer-events:none;max-width:90%;text-align:center}
+.toast.on{opacity:1}
+.spin{width:34px;height:34px;border:4px solid #ffffff22;border-top-color:#fff;border-radius:50%;animation:sp 0.8s linear infinite;margin:40px auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+.seg{display:flex;background:var(--card2);border-radius:12px;padding:4px;margin-bottom:12px}
+.seg button{flex:1;padding:9px;border-radius:9px;font-weight:700;color:var(--mut)}
+.seg button.on{background:#fff;color:#000}
+.linescore td,.linescore th{padding:6px 4px}
+.form label{display:block;font-size:12px;color:var(--mut);margin:12px 2px 6px}
+.tag{font-size:10px;font-weight:800;padding:2px 6px;border-radius:6px;background:#2a3452;color:#cfd6ea;margin-left:6px;vertical-align:2px}
+.inj{font-size:11px;font-weight:800;padding:3px 7px;border-radius:6px}
+.inj.out{background:#7f1d1d;color:#fecaca}
+.inj.dtd{background:#713f12;color:#fde68a}
+</style>
+</head>
+<body>
+<header>
+  <svg width="36" height="36" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#f58426" stroke="#fff" stroke-width="2"/><path d="M2 20h36M20 2v36M7 7c7 6 7 20 0 26M33 7c-7 6-7 20 0 26" stroke="#1a1a1a" stroke-width="2" fill="none"/></svg>
+  <h1>NBA <span>en Colores</span></h1>
+  <button class="ib" id="btnSettings" aria-label="Ajustes">⚙️</button>
+</header>
+<main id="view"></main>
+<nav id="nav">
+  <button data-v="games" class="on"><b>🏀</b>Juegos</button>
+  <button data-v="standings"><b>🏆</b>Posiciones</button>
+  <button data-v="teams"><b>🎨</b>Equipos</button>
+  <button data-v="news"><b>📰</b>Noticias</button>
+  <button data-v="iptv"><b>📺</b>IPTV</button>
+</nav>
+<div class="modal" id="modal"><div class="mhead"><button class="ib" id="mBack">←</button><h3 id="mTitle"></h3></div><div class="mbody" id="mBody"></div></div>
+<div class="player" id="player"><div class="bar"><button class="ib" id="pClose">✕</button><b id="pTitle"></b><button class="ib" id="pFs">⛶</button></div><video id="video" controls playsinline autoplay></video><div class="msg" id="pMsg"></div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="fileIn" accept=".m3u,.m3u8,.txt,audio/x-mpegurl,application/x-mpegurl,*/*" hidden>
+<script src="hls.min.js"></script>
+<script>
+"use strict";
+/* ============ EQUIPOS ============ */
+const T={
+ATL:{id:1,n:"Atlanta Hawks",k:"Hawks",c1:"#E03A3E",c2:"#C1D32F",cf:"E"},
+BOS:{id:2,n:"Boston Celtics",k:"Celtics",c1:"#007A33",c2:"#BA9653",cf:"E"},
+BKN:{id:17,n:"Brooklyn Nets",k:"Nets",c1:"#000000",c2:"#FFFFFF",cf:"E"},
+CHA:{id:30,n:"Charlotte Hornets",k:"Hornets",c1:"#1D1160",c2:"#00788C",cf:"E"},
+CHI:{id:4,n:"Chicago Bulls",k:"Bulls",c1:"#CE1141",c2:"#000000",cf:"E"},
+CLE:{id:5,n:"Cleveland Cavaliers",k:"Cavaliers",c1:"#860038",c2:"#FDBB30",cf:"E"},
+DAL:{id:6,n:"Dallas Mavericks",k:"Mavericks",c1:"#00538C",c2:"#B8C4CA",cf:"W"},
+DEN:{id:7,n:"Denver Nuggets",k:"Nuggets",c1:"#0E2240",c2:"#FEC524",cf:"W"},
+DET:{id:8,n:"Detroit Pistons",k:"Pistons",c1:"#C8102E",c2:"#1D42BA",cf:"E"},
+GSW:{id:9,n:"Golden State Warriors",k:"Warriors",c1:"#1D428A",c2:"#FFC72C",cf:"W"},
+HOU:{id:10,n:"Houston Rockets",k:"Rockets",c1:"#CE1141",c2:"#000000",cf:"W"},
+IND:{id:11,n:"Indiana Pacers",k:"Pacers",c1:"#002D62",c2:"#FDBB30",cf:"E"},
+LAC:{id:12,n:"LA Clippers",k:"Clippers",c1:"#C8102E",c2:"#1D428A",cf:"W"},
+LAL:{id:13,n:"Los Angeles Lakers",k:"Lakers",c1:"#552583",c2:"#FDB927",cf:"W"},
+MEM:{id:29,n:"Memphis Grizzlies",k:"Grizzlies",c1:"#5D76A9",c2:"#12173F",cf:"W"},
+MIA:{id:14,n:"Miami Heat",k:"Heat",c1:"#98002E",c2:"#F9A01B",cf:"E"},
+MIL:{id:15,n:"Milwaukee Bucks",k:"Bucks",c1:"#00471B",c2:"#EEE1C6",cf:"E"},
+MIN:{id:16,n:"Minnesota Timberwolves",k:"Timberwolves",c1:"#0C2340",c2:"#78BE20",cf:"W"},
+NOP:{id:3,n:"New Orleans Pelicans",k:"Pelicans",c1:"#0C2340",c2:"#C8102E",cf:"W"},
+NYK:{id:18,n:"New York Knicks",k:"Knicks",c1:"#006BB6",c2:"#F58426",cf:"E"},
+OKC:{id:25,n:"Oklahoma City Thunder",k:"Thunder",c1:"#007AC1",c2:"#EF3B24",cf:"W"},
+ORL:{id:19,n:"Orlando Magic",k:"Magic",c1:"#0077C0",c2:"#C4CED4",cf:"E"},
+PHI:{id:20,n:"Philadelphia 76ers",k:"76ers",c1:"#006BB6",c2:"#ED174C",cf:"E"},
+PHX:{id:21,n:"Phoenix Suns",k:"Suns",c1:"#1D1160",c2:"#E56020",cf:"W"},
+POR:{id:22,n:"Portland Trail Blazers",k:"Trail Blazers",c1:"#E03A3E",c2:"#000000",cf:"W"},
+SAC:{id:23,n:"Sacramento Kings",k:"Kings",c1:"#5A2D81",c2:"#63727A",cf:"W"},
+SAS:{id:24,n:"San Antonio Spurs",k:"Spurs",c1:"#000000",c2:"#C4CED4",cf:"W"},
+TOR:{id:28,n:"Toronto Raptors",k:"Raptors",c1:"#CE1141",c2:"#000000",cf:"E"},
+UTA:{id:26,n:"Utah Jazz",k:"Jazz",c1:"#002B5C",c2:"#F9A01B",cf:"W"},
+WAS:{id:27,n:"Washington Wizards",k:"Wizards",c1:"#002B5C",c2:"#E31837",cf:"E"}};
+const ALIAS={GS:"GSW",NY:"NYK",NO:"NOP",SA:"SAS",UTAH:"UTA",WSH:"WAS",BRK:"BKN",PHO:"PHX",CHO:"CHA"};
+const ab=a=>{a=(a||"").toUpperCase();return ALIAS[a]||a};
+const tm=a=>T[ab(a)]||{n:a,k:a,c1:"#334",c2:"#889",cf:""};
+const byId=id=>Object.keys(T).find(k=>T[k].id==id);
+const lum=h=>{h=h.replace("#","");const [r,g,b]=[0,2,4].map(i=>parseInt(h.substr(i,2),16)/255).map(v=>v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*r+.7152*g+.0722*b};
+const fg=h=>lum(h)>.4?"#0b0f1a":"#ffffff";
+
+/* Insignia original: balón estilizado con los colores del equipo (no es el logo oficial) */
+function badge(a,s=44){a=ab(a);const t=tm(a),c1=t.c1,c2=t.c2==t.c1?"#fff":t.c2,f=fg(c1),u=a+Math.random().toString(36).slice(2,6);
+const fs=a.length>3?s*.24:s*.3;
+return `<svg width="${s}" height="${s}" viewBox="0 0 100 100" aria-label="${a}"><defs><radialGradient id="g${u}" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></radialGradient><clipPath id="c${u}"><circle cx="50" cy="50" r="44"/></clipPath></defs>
+<circle cx="50" cy="50" r="48" fill="${c2}"/><circle cx="50" cy="50" r="44" fill="${c1}"/>
+<g clip-path="url(#c${u})" stroke="${c2}" stroke-width="3" fill="none" opacity=".55"><path d="M6 50h88M50 6v88"/><path d="M18 14c16 14 16 58 0 72M82 14c-16 14-16 58 0 72"/></g>
+<circle cx="50" cy="50" r="44" fill="url(#g${u})"/>
+<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="system-ui,Arial" font-weight="900" font-size="${fs*100/s}" fill="${f}" stroke="${c1}" stroke-width="4" paint-order="stroke">${a}</text></svg>`}
+
+/* ============ UTILIDADES ============ */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){toast("Memoria llena: la lista es muy grande");return false}}};
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove("on"),2600)}
+const API="https://site.api.espn.com/apis/site/v2/sports/basketball/nba";
+async function J(url){const ck="c:"+url;try{const r=await fetch(url,{cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);const d=await r.json();try{sessionStorage.setItem(ck,JSON.stringify(d))}catch(e){}return d}catch(e){const c=sessionStorage.getItem(ck);if(c)return JSON.parse(c);throw e}}
+const spin='<div class="spin"></div>';
+const err=(e,retry)=>`<div class="empty"><b>📡</b>No se pudieron cargar los datos.<br><small>${esc(e.message||e)}</small><br><br><button class="btn s" onclick="${retry}">Reintentar</button></div>`;
+const ymd=d=>d.getFullYear()+String(d.getMonth()+1).padStart(2,"0")+String(d.getDate()).padStart(2,"0");
+const hora=d=>new Date(d).toLocaleTimeString("es-PR",{hour:"numeric",minute:"2-digit"});
+const fechaC=d=>new Date(d).toLocaleDateString("es-PR",{weekday:"short",day:"numeric",month:"short"});
+let FAV=LS.get("fav","");
+function applyTheme(){const t=T[FAV];document.documentElement.style.setProperty("--a1",t?t.c1:"#1d428a");document.documentElement.style.setProperty("--a2",t?(t.c2=="#FFFFFF"?"#444":t.c2):"#c8102e")}
+applyTheme();
+
+/* ============ NAVEGACIÓN ============ */
+let cur="games",timer=null;
+const views={games:vGames,standings:vStandings,teams:vTeams,news:vNews,iptv:vIptv};
+function go(v){cur=v;clearInterval(timer);document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.v==v));scrollTo(0,0);views[v]()}
+$("#nav").onclick=e=>{const b=e.target.closest("button");if(b)go(b.dataset.v)};
+const stack=[];
+function openModal(title,html){$("#mTitle").textContent=title;$("#mBody").innerHTML=html;$("#modal").classList.add("on");$("#modal").scrollTop=0;stack.push(1)}
+function closeModal(){$("#modal").classList.remove("on");stack.pop();clearInterval(window._mt)}
+$("#mBack").onclick=closeModal;
+window.appBack=function(){if($("#player").classList.contains("on")){closePlayer();return true}if($("#modal").classList.contains("on")){closeModal();return true}if(cur!="games"){go("games");return true}return false};
+document.addEventListener("keydown",e=>{if(e.key=="Escape")appBack()});
+
+/* ============ JUEGOS ============ */
+let gDate=new Date();
+function stateOf(ev){return ev.status?.type?.state||ev.competitions?.[0]?.status?.type?.state}
+function gameCard(ev){const c=ev.competitions[0],st=c.status||ev.status,s=st.type.state;
+const away=c.competitors.find(x=>x.homeAway=="away"),home=c.competitors.find(x=>x.homeAway=="home");
+const A=ab(away.team.abbreviation),H=ab(home.team.abbreviation);
+const sa=+away.score||0,sh=+home.score||0;
+const pill=s=="in"?`<span class="pill live">● EN VIVO</span>`:s=="post"?`<span class="pill fin">FINAL</span>`:`<span class="pill pre">${hora(ev.date)}</span>`;
+const det=s=="pre"?(c.broadcasts||[]).flatMap(b=>b.names||[]).join(" · "):esc(st.type.shortDetail||"");
+const row=(t,A,sc,lose)=>`<div class="team ${lose?"lose":""}">${badge(A,42)}<div class="nm"><b>${esc(tm(A).n)}</b><small>${esc((t.records||[])[0]?.summary||"")}</small></div><div class="sc">${s=="pre"?"":sc}</div></div>`;
+let lead="";const L=c.leaders||[];
+if(s!="pre"){const pick=n=>{let best=null;c.competitors.forEach(cp=>(cp.leaders||[]).filter(l=>l.name==n).forEach(l=>{const x=l.leaders?.[0];if(x&&(!best||+x.value>+best.value))best=x}));return best};
+const lb=[["points","PTS"],["rebounds","REB"],["assists","AST"]].map(([n,l])=>{const x=pick(n);return x?`<div>${l}<b>${esc(x.athlete?.shortName||"")} ${esc(x.displayValue?.split(" ")[0]||x.value)}</b></div>`:""}).join("");if(lb)lead=`<div class="leaders">${lb}</div>`}
+const fav=FAV&&(A==FAV||H==FAV);
+return `<div class="card game" onclick="openGame('${ev.id}')" ${fav?'style="outline:2px solid var(--a2)"':""}><div class="stripe"><i style="background:${tm(A).c1}"></i><i style="background:${tm(A).c2}"></i><i style="background:${tm(H).c2}"></i><i style="background:${tm(H).c1}"></i></div><div class="body">
+${row(away,A,sa,s=="post"&&sa<sh)}${row(home,H,sh,s=="post"&&sh<sa)}
+<div class="st">${pill}<span>${det}</span></div>${lead}</div></div>`}
+async function vGames(){const v=$("#view");
+const days=[-3,-2,-1,0,1,2,3].map(o=>{const d=new Date();d.setDate(d.getDate()+o);return d});
+const chips=days.map(d=>`<button class="chip ${ymd(d)==ymd(gDate)?"on":""}" data-d="${d.toISOString()}">${ymd(d)==ymd(new Date())?"Hoy":fechaC(d)}</button>`).join("");
+v.innerHTML=`<div class="datebar"><div class="chips" id="dchips">${chips}</div><button class="ib" style="background:var(--card2)" id="pick">📅</button></div><div id="glist">${spin}</div>`;
+$("#dchips").onclick=e=>{const b=e.target.closest(".chip");if(b){gDate=new Date(b.dataset.d);vGames()}};
+$("#pick").onclick=()=>{const i=document.createElement("input");i.type="date";i.style.cssText="position:fixed;opacity:0";document.body.appendChild(i);i.onchange=()=>{if(i.value){const [y,m,d]=i.value.split("-");gDate=new Date(y,m-1,d);vGames()}i.remove()};i.showPicker?i.showPicker():i.click()};
+const sel=$("#dchips .on");if(sel)sel.scrollIntoView({inline:"center",block:"nearest"});
+const load=async()=>{try{const d=await J(`${API}/scoreboard?dates=${ymd(gDate)}`);let ev=d.events||[];
+ev.sort((a,b)=>{const o={in:0,pre:1,post:2};const fa=FAV&&JSON.stringify(a.competitions[0].competitors.map(c=>ab(c.team.abbreviation))).includes(FAV)?-10:0,fb=FAV&&JSON.stringify(b.competitions[0].competitors.map(c=>ab(c.team.abbreviation))).includes(FAV)?-10:0;return(fa+o[stateOf(a)])-(fb+o[stateOf(b)])||new Date(a.date)-new Date(b.date)});
+const el=$("#glist");if(!el)return;
+el.innerHTML=ev.length?`<div class="mut" style="margin:0 2px 10px;font-size:13px">${ev.length} juego${ev.length>1?"s":""} · ${gDate.toLocaleDateString("es-PR",{weekday:"long",day:"numeric",month:"long"})}</div>`+ev.map(gameCard).join(""):`<div class="empty"><b>😴</b>No hay juegos este día.</div>`;
+clearInterval(timer);if(ev.some(e=>stateOf(e)=="in"))timer=setInterval(()=>{if(cur=="games"&&!$("#modal").classList.contains("on"))load()},30000)}catch(e){const el=$("#glist");if(el)el.innerHTML=err(e,"vGames()")}};
+load()}
+
+/* Detalle del juego / box score */
+async function openGame(id){openModal("Juego",spin);
+const load=async()=>{try{const d=await J(`${API}/summary?event=${id}`);const c=d.header.competitions[0],st=c.status,s=st.type.state;
+const comps=[c.competitors.find(x=>x.homeAway=="away"),c.competitors.find(x=>x.homeAway=="home")];
+const [A,H]=comps.map(x=>ab(x.team.abbreviation));$("#mTitle").textContent=`${A} @ ${H}`;
+const pill=s=="in"?`<span class="pill live">● EN VIVO · ${esc(st.type.shortDetail)}</span>`:s=="post"?`<span class="pill fin">${esc(st.type.shortDetail||"FINAL")}</span>`:`<span class="pill pre">${fechaC(c.date)} · ${hora(c.date)}</span>`;
+let h=`<div class="hero" style="background:linear-gradient(110deg,${tm(A).c1} 0 50%,${tm(H).c1} 50%);justify-content:space-around;text-align:center">
+${comps.map((x,i)=>`<div>${badge(ab(x.team.abbreviation),64)}<div style="font-weight:800;color:${fg(tm(ab(x.team.abbreviation)).c1)}">${esc(tm(ab(x.team.abbreviation)).k)}</div></div>${i==0?`<div><div style="font-size:38px;font-weight:900;text-shadow:0 2px 8px #0008">${s=="pre"?"vs":`${x.score??0} - ${comps[1].score??0}`}</div>${pill}</div>`:""}`).join("")}</div>`;
+// parciales por cuarto
+const ls=comps.map(x=>x.linescores||[]);if(ls[0].length){h+=`<div class="card tw"><table class="linescore"><thead><tr><th></th>${ls[0].map((_,i)=>`<th>${i<4?"C"+(i+1):"OT"+(i-3)}</th>`).join("")}<th>T</th></tr></thead><tbody>${comps.map((x,j)=>`<tr><td><b style="color:${tm(ab(x.team.abbreviation)).c2=="#000000"?"#fff":tm(ab(x.team.abbreviation)).c2}">${ab(x.team.abbreviation)}</b></td>${ls[j].map(q=>`<td>${q.displayValue??q.value}</td>`).join("")}<td><b>${x.score}</b></td></tr>`).join("")}</tbody></table></div>`}
+// transmisión e IPTV
+const bc=[...new Set((d.broadcasts||c.broadcasts||[]).flatMap(b=>b.media?.shortName?[b.media.shortName]:(b.names||[])))];
+h+=`<div class="row" style="margin:4px 0 12px;flex-wrap:wrap">${bc.length?`<span class="mut" style="font-size:13px">📡 ${esc(bc.join(" · "))}</span>`:""}<span style="flex:1"></span><button class="btn s" onclick='findIptv(${JSON.stringify([A,H])},${JSON.stringify(bc)})'>📺 Buscar en IPTV</button></div>`;
+// box score
+const P=d.boxscore?.players||[];
+if(P.length){const want=["MIN","PTS","REB","AST","STL","BLK","FG","3PT","FT","TO","+/-"];
+P.forEach(tp=>{const a=ab(tp.team.abbreviation),t=tm(a),sg=tp.statistics?.[0];if(!sg)return;const lb=(sg.labels||sg.names||[]).map(x=>x.toUpperCase());const idx=want.map(w=>lb.indexOf(w));
+const ath=(sg.athletes||[]).filter(x=>!x.didNotPlay&&(x.stats||[]).length);const pi=lb.indexOf("PTS");const top=Math.max(...ath.map(x=>+x.stats[pi]||0));
+h+=`<div class="card"><div style="background:${t.c1};color:${fg(t.c1)};padding:10px 14px;font-weight:800;display:flex;align-items:center;gap:10px">${badge(a,30)}${esc(t.n)}</div><div class="tw"><table><thead><tr><th>Jugador</th>${want.map((w,i)=>idx[i]>=0?`<th>${w}</th>`:"").join("")}</tr></thead><tbody>${ath.map(x=>`<tr ${x.starter?"":'style="opacity:.85"'}><td>${+x.stats[pi]==top&&top>0?"<b>":""}${esc(x.athlete.shortName||x.athlete.displayName)}${+x.stats[pi]==top&&top>0?" 🔥</b>":""}${x.starter?'<span class="tag">T</span>':""}</td>${idx.map(i=>i>=0?`<td>${i==pi?"<b>"+esc(x.stats[i])+"</b>":esc(x.stats[i])}</td>`:"").join("")}</tr>`).join("")}</tbody></table></div></div>`})}
+else if(s=="pre"){const inj=(d.injuries||[]).map(ti=>{const a=ab(ti.team?.abbreviation);return(ti.injuries||[]).map(i=>`<div class="it">${badge(a,30)}<div style="flex:1"><b>${esc(i.athlete?.displayName)}</b><br><small class="mut">${esc(i.details?.type||i.type?.description||"")}</small></div>${injPill(i.status)}</div>`).join("")}).join("");
+const lastm=(d.lastFiveGames||[]).map(tg=>{const a=ab(tg.team?.abbreviation);return`<div class="it">${badge(a,30)}<b style="flex:1">${esc(tm(a).k)} · últimos 5</b><span>${(tg.events||[]).map(e=>e.gameResult=="W"?"🟢":"🔴").join("")}</span></div>`}).join("");
+h+=(lastm?`<h2>Forma reciente</h2><div class="card list">${lastm}</div>`:"")+(inj?`<h2>Lesionados</h2><div class="card list">${inj}</div>`:"");
+if(c.venue||d.gameInfo?.venue)h+=`<p class="mut">🏟️ ${esc((d.gameInfo?.venue||c.venue).fullName)}</p>`}
+const mb=$("#mBody");if(mb&&$("#modal").classList.contains("on"))mb.innerHTML=h;
+clearInterval(window._mt);if(s=="in")window._mt=setInterval(load,25000)}catch(e){$("#mBody").innerHTML=err(e,`openGame('${id}')`)}};
+load()}
+const injPill=s=>{s=s||"";const o=/out|fuera/i.test(s);return`<span class="inj ${o?"out":"dtd"}">${o?"FUERA":esc(s==="Day-To-Day"?"DÍA A DÍA":s.toUpperCase())}</span>`};
+
+/* ============ POSICIONES ============ */
+let conf="E";
+async function vStandings(){const v=$("#view");v.innerHTML=`<div class="seg"><button data-c="E" class="${conf=="E"?"on":""}">Este</button><button data-c="W" class="${conf=="W"?"on":""}">Oeste</button></div><div id="sl">${spin}</div>`;
+v.querySelector(".seg").onclick=e=>{const b=e.target.closest("button");if(b){conf=b.dataset.c;vStandings()}};
+try{const d=await J("https://site.api.espn.com/apis/v2/sports/basketball/nba/standings");
+const g=(d.children||[]).find(x=>conf=="E"?/east/i.test(x.name):/west/i.test(x.name));const st=(e,n)=>(e.stats||[]).find(s=>s.name==n||s.type==n);
+let E=(g?.standings?.entries||[]).map(e=>({a:ab(e.team.abbreviation),w:st(e,"wins")?.value??0,l:st(e,"losses")?.value??0,p:st(e,"winPercent")?.value??0,gb:st(e,"gamesBehind")?.displayValue??"-",sk:st(e,"streak")?.displayValue??"",l10:(st(e,"Last Ten Games")||st(e,"lasttengames"))?.summary||"",seed:st(e,"playoffSeed")?.value||99}));
+E.sort((a,b)=>a.seed-b.seed||b.p-a.p);
+$("#sl").innerHTML=`<div class="legend"><span><i style="background:var(--ok)"></i>Playoffs</span><span><i style="background:var(--warn)"></i>Play-In</span><span><i style="background:#4b5574"></i>Fuera</span></div><div class="card tw"><table><thead><tr><th>#  Equipo</th><th>G</th><th>P</th><th>%</th><th>DIF</th><th>RACHA</th>${E[0]?.l10?"<th>U10</th>":""}</tr></thead><tbody>${E.map((e,i)=>`<tr class="${i<6?"zone-p":i<10?"zone-i":"zone-o"}" onclick="openTeam('${e.a}')" ${e.a==FAV?'style="background:#ffffff10"':""}><td><span class="seed"><span class="mut" style="width:18px;text-align:right">${i+1}</span>${badge(e.a,28)}<b>${esc(tm(e.a).k)}</b></span></td><td>${e.w}</td><td>${e.l}</td><td>${(+e.p).toFixed(3).replace(/^0/,"")}</td><td>${e.gb}</td><td style="color:${/^W/.test(e.sk)?"var(--ok)":"#f87171"}">${e.sk.replace("W","G").replace("L","P")}</td>${e.l10?`<td>${e.l10}</td>`:""}</tr>`).join("")}</tbody></table></div>`}catch(e){$("#sl").innerHTML=err(e,"vStandings()")}}
+
+/* ============ EQUIPOS ============ */
+function vTeams(){const v=$("#view");const cell=a=>`<button class="tcell" style="--c1:${T[a].c1}" onclick="openTeam('${a}')">${badge(a,58)}<div>${esc(T[a].k)}${a==FAV?" ⭐":""}</div></button>`;
+const ks=Object.keys(T).sort((a,b)=>T[a].k.localeCompare(T[b].k));
+v.innerHTML=`<button class="btn full g" style="margin-bottom:6px" onclick="openInjuries()">🩹 Reporte de lesiones de la liga</button><h2>Conferencia Este</h2><div class="grid">${ks.filter(a=>T[a].cf=="E").map(cell).join("")}</div><h2>Conferencia Oeste</h2><div class="grid">${ks.filter(a=>T[a].cf=="W").map(cell).join("")}</div><p class="mut" style="font-size:11px;text-align:center;margin-top:20px">Insignias originales con los colores de cada equipo. Datos: ESPN.</p>`}
+async function openTeam(a){a=ab(a);const t=T[a];openModal(t.n,spin);
+try{const [info,ros,sch]=await Promise.all([J(`${API}/teams/${t.id}`).catch(()=>null),J(`${API}/teams/${t.id}/roster`).catch(()=>null),J(`${API}/teams/${t.id}/schedule`).catch(()=>null)]);
+const ti=info?.team||{};const rec=ti.record?.items?.[0]?.summary||"";const stand=ti.standingSummary||"";
+let h=`<div class="hero" style="background:linear-gradient(135deg,${t.c1},${t.c1} 60%,${t.c2});color:${fg(t.c1)}">${badge(a,80)}<div><h3>${esc(t.n)}</h3><p>${esc(rec)}${stand?" · "+esc(stand):""}</p><button class="btn s" style="margin-top:10px" onclick="setFav('${a}')">${FAV==a?"⭐ Favorito":"☆ Hacer favorito"}</button></div></div>`;
+h+=`<button class="btn full g" style="margin-bottom:6px" onclick='findIptv(["${a}"],[])'>📺 Canales IPTV de los ${esc(t.k)}</button>`;
+const evs=sch?.events||[];const done=evs.filter(e=>e.competitions?.[0]?.status?.type?.completed);const next=evs.filter(e=>!e.competitions?.[0]?.status?.type?.completed);
+const gl=e=>{const c=e.competitions[0];const me=c.competitors.find(x=>ab(x.team.abbreviation)==a)||c.competitors[0];const op=c.competitors.find(x=>x!==me);const o=ab(op.team.abbreviation);const sc=x=>x.score?.displayValue??x.score?.value??x.score??"";const done=c.status?.type?.completed;const w=me.winner;
+return`<div class="it" onclick="openGame('${e.id}')">${badge(o,32)}<div style="flex:1"><b>${me.homeAway=="home"?"vs":"@"} ${esc(tm(o).k)}</b><br><small class="mut">${fechaC(e.date)}${done?"":" · "+hora(e.date)}</small></div>${done?`<b style="color:${w?"var(--ok)":"#f87171"}">${w?"G":"P"} ${sc(me)}-${sc(op)}</b>`:""}</div>`};
+if(next.length)h+=`<h2>Próximos juegos</h2><div class="card list">${next.slice(0,5).map(gl).join("")}</div>`;
+if(done.length)h+=`<h2>Últimos resultados</h2><div class="card list">${done.slice(-5).reverse().map(gl).join("")}</div>`;
+let ath=ros?.athletes||[];if(ath[0]?.items)ath=ath.flatMap(x=>x.items);
+if(ath.length)h+=`<h2>Plantilla</h2><div class="card list">${ath.map(p=>`<div class="it"><div class="num" style="background:${t.c1};color:${fg(t.c1)};border:2px solid ${t.c2}">${esc(p.jersey||"–")}</div><div style="flex:1;min-width:0"><b>${esc(p.displayName)}</b><br><small class="mut">${esc(p.position?.abbreviation||"")} · ${esc(p.displayHeight||"")} · ${p.age?p.age+" años":""}</small></div>${(p.injuries||[]).length?injPill(p.injuries[0].status):""}</div>`).join("")}</div>`;
+if($("#modal").classList.contains("on"))$("#mBody").innerHTML=h}catch(e){$("#mBody").innerHTML=err(e,`openTeam('${a}')`)}}
+function setFav(a){FAV=FAV==a?"":a;LS.set("fav",FAV);applyTheme();toast(FAV?`⭐ ${T[a].k} es tu equipo`:"Favorito quitado");openTeam(a);stack.pop()}
+async function openInjuries(){openModal("Lesiones",spin);try{const d=await J(`${API}/injuries`);const L=d.injuries||[];
+$("#mBody").innerHTML=L.length?L.map(ti=>{const a=ab(ti.team?.abbreviation||Object.keys(T).find(k=>T[k].n==ti.displayName)||"");const t=tm(a);return`<div class="card"><div style="background:${t.c1};color:${fg(t.c1)};padding:10px 14px;font-weight:800;display:flex;gap:10px;align-items:center">${badge(a,28)}${esc(ti.displayName||t.n)}</div><div class="list">${(ti.injuries||[]).map(i=>`<div class="it"><div style="flex:1"><b>${esc(i.athlete?.displayName)}</b> <small class="mut">${esc(i.athlete?.position?.abbreviation||"")}</small><br><small class="mut">${esc(i.shortComment||i.details?.type||"")}</small></div>${injPill(i.status)}</div>`).join("")}</div></div>`}).join(""):`<div class="empty"><b>💪</b>Sin lesionados reportados.</div>`}catch(e){$("#mBody").innerHTML=err(e,"openInjuries()")}}
+
+/* ============ NOTICIAS ============ */
+async function vNews(){const v=$("#view");v.innerHTML=spin;try{const d=await J(`${API}/news?limit=30`);
+v.innerHTML=(d.articles||[]).map(a=>`<a class="card news" style="display:block;text-decoration:none" href="${esc(a.links?.web?.href||"#")}" target="_blank" rel="noopener">${a.images?.[0]?.url?`<img loading="lazy" src="${esc(a.images[0].url)}" alt="">`:""}<div class="body"><h4>${esc(a.headline)}</h4><p>${esc(a.description||"")}</p><p style="margin-top:6px;font-size:11px">${a.published?fechaC(a.published):""}</p></div></a>`).join("")||`<div class="empty"><b>📰</b>Sin noticias.</div>`}catch(e){v.innerHTML=err(e,"vNews()")}}
+
+/* ============ IPTV ============ */
+const nick=Object.values(T).map(t=>t.n.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("|")+"|lakers|celtics|warriors|knicks|mavericks|timberwolves|cavaliers|grizzlies|pelicans|raptors|clippers|nuggets|pistons|hornets|76ers|sixers|trail ?blazers|bucks|wizards|rockets|spurs|thunder";
+const CATS=[
+{id:"nba",n:"NBA",e:"🏀",re:new RegExp("\\bnba\\b|league ?pass|nba ?tv|"+nick,"i")},
+{id:"bsk",n:"Baloncesto",e:"⛹️",re:/basket|baloncesto|b[aá]squet|\bbsn\b|euroleague|euroliga|\bwnba\b|\bfiba\b|ncaa ?b|acb/i},
+{id:"mlb",n:"Béisbol",e:"⚾",re:/\bmlb\b|b[eé]isbol|baseball|lidom|lbprc|\blvbp\b|lmp\b|serie del caribe|roberto clemente/i},
+{id:"fut",n:"Fútbol",e:"⚽",re:/f[uú]tbol|futbol|soccer|liga ?mx|premier|laliga|la liga|champions|uefa|fifa|serie a|bundesliga|ligue ?1|\bmls\b|copa|tudn|gol ?tv|win ?sports|\bgol\b/i},
+{id:"nfl",n:"NFL",e:"🏈",re:/\bnfl\b|redzone|red zone|ncaa ?f|college football|american football|f[uú]tbol americano/i},
+{id:"nhl",n:"Hockey",e:"🏒",re:/\bnhl\b|hockey/i},
+{id:"fight",n:"Boxeo/UFC",e:"🥊",re:/\bufc\b|box(eo|ing)|\bwwe\b|\baew\b|mma|lucha|fight|pelea|ppv/i},
+{id:"ten",n:"Tenis",e:"🎾",re:/tenis|tennis|\batp\b|\bwta\b/i},
+{id:"golf",n:"Golf",e:"⛳",re:/golf|\bpga\b/i},
+{id:"motor",n:"Motor",e:"🏎️",re:/\bf1\b|formula ?1|nascar|motogp|indycar|motor/i},
+{id:"gen",n:"Deportes",e:"🏟️",re:/espn|fox ?sports|\bfs1\b|\bfs2\b|bein|sky ?sports|tnt ?sports|dazn|claro ?sports|directv ?sports|dsports|sportsnet|\btsn\b|eleven|movistar ?deportes|arena ?sport|\bsport|deport|\bcbs ?sports|nbc ?sports|\bacc ?network|\bsec ?network|big ?ten|tyc|vix|star ?\+|flow ?sports|\babc\b|\btnt\b|prime video|peacock/i}];
+function catOf(ch){const s=(ch.g||"")+" | "+ch.n;for(const c of CATS)if(c.re.test(ch.n))return c.id;for(const c of CATS)if(c.re.test(ch.g||""))return c.id;return null}
+function attr(l,k){const m=l.match(new RegExp(k+'="([^"]*)"',"i"));return m?m[1]:""}
+function parseM3U(txt){const out=[];let c=null;const L=txt.split(/\r?\n/);
+for(let i=0;i<L.length;i++){const l=L[i].trim();if(!l)continue;
+if(l.startsWith("#EXTINF")){const ci=l.lastIndexOf(",");c={n:(ci>=0?l.slice(ci+1):"").trim()||attr(l,"tvg-name")||"Canal",g:attr(l,"group-title"),l:attr(l,"tvg-logo")}}
+else if(l.startsWith("#EXTGRP:")&&c){c.g=c.g||l.slice(8)}
+else if(!l.startsWith("#")){if(c){c.u=l;const k=catOf(c);if(k){c.k=k;out.push(c)}}c=null}}
+return out}
+let LISTS=LS.get("lists",[]),FAVCH=LS.get("favch",[]),icat="all",iq="";
+function saveLists(){return LS.set("lists",LISTS)}
+async function fetchText(url){const r=await fetch(url);if(!r.ok)throw new Error("HTTP "+r.status);return r.text()}
+async function addList(name,url,text){toast("Cargando lista…");try{if(!text)text=await fetchText(url);if(!/#EXTM3U|#EXTINF/i.test(text.slice(0,5000)))throw new Error("No parece una lista M3U");
+const ch=parseM3U(text);const old=LISTS.findIndex(l=>url&&l.url==url);const item={id:Date.now(),name:name||"Lista "+(LISTS.length+1),url:url||"",ch,at:Date.now()};
+if(old>=0){item.id=LISTS[old].id;item.name=name||LISTS[old].name;LISTS[old]=item}else LISTS.push(item);
+if(saveLists()){toast(`✅ ${ch.length} canales deportivos encontrados`)}vIptv()}catch(e){toast("❌ "+(e.message||"Error al cargar")+(location.protocol=="https:"?" (prueba en la APK)":""))}}
+function allCh(){return LISTS.flatMap(l=>l.ch.map(c=>({...c,li:l.name})))}
+function chRow(c){const f=FAVCH.includes(c.u);const cat=CATS.find(x=>x.id==c.k);return`<div class="ch"><div onclick='play(${JSON.stringify(c.u)},${JSON.stringify(c.n)})' style="display:flex;gap:12px;align-items:center;flex:1;min-width:0">${c.l?`<img loading="lazy" src="${esc(c.l)}" onerror="this.outerHTML='<div class=ph>${cat?.e||"📺"}</div>'">`:`<div class="ph">${cat?.e||"📺"}</div>`}<div class="nm"><b>${esc(c.n)}</b><small>${esc(cat?.n||"")}${c.g?" · "+esc(c.g):""}</small></div></div><button class="star ${f?"on":""}" onclick='togFav(${JSON.stringify(c.u)},this)'>⭐</button></div>`}
+function togFav(u,b){const i=FAVCH.indexOf(u);i>=0?FAVCH.splice(i,1):FAVCH.push(u);LS.set("favch",FAVCH);b.classList.toggle("on")}
+function vIptv(){const v=$("#view");const all=allCh();
+if(!LISTS.length){v.innerHTML=`<div class="empty"><b>📺</b><h3 style="color:var(--txt);margin:0 0 6px">Tu IPTV deportivo</h3>Agrega tus listas M3U y la app separa <b style="display:inline;font-size:inherit">solo los canales de deportes</b> por categoría, con la NBA primero.</div>${listForm()}`;bindForm();return}
+const cnt={};all.forEach(c=>cnt[c.k]=(cnt[c.k]||0)+1);const nf=all.filter(c=>FAVCH.includes(c.u)).length;
+const chips=`<button class="chip ${icat=="all"?"on":""}" data-k="all">Todos<small>${all.length}</small></button>`+(nf?`<button class="chip ${icat=="fav"?"on":""}" data-k="fav">⭐ Favoritos<small>${nf}</small></button>`:"")+CATS.filter(c=>cnt[c.id]).map(c=>`<button class="chip ${icat==c.id?"on":""}" data-k="${c.id}">${c.e} ${c.n}<small>${cnt[c.id]}</small></button>`).join("");
+v.innerHTML=`<div class="row" style="margin-bottom:10px"><input id="iq" placeholder="🔎 Buscar canal (ej. Lakers, ESPN)" value="${esc(iq)}"><button class="ib" style="background:var(--card2);flex:none" onclick="manageLists()">☰</button></div><div class="chips" id="ichips">${chips}</div><div class="card" id="ilist"></div>`;
+$("#ichips").onclick=e=>{const b=e.target.closest(".chip");if(b){icat=b.dataset.k;vIptv()}};
+const render=()=>{const q=iq.toLowerCase();let L=all.filter(c=>(icat=="all"||(icat=="fav"?FAVCH.includes(c.u):c.k==icat))&&(!q||(c.n+" "+c.g).toLowerCase().includes(q)));
+if(icat=="all"){const o=Object.fromEntries(CATS.map((c,i)=>[c.id,i]));L.sort((a,b)=>o[a.k]-o[b.k])}
+const el=$("#ilist");el.innerHTML=L.length?L.slice(0,400).map(chRow).join("")+(L.length>400?`<div class="ch mut">…y ${L.length-400} más. Usa el buscador.</div>`:""):`<div class="empty"><b>🔍</b>Nada por aquí.</div>`};
+$("#iq").oninput=e=>{iq=e.target.value;render()};render();
+const sel=$("#ichips .on");if(sel)sel.scrollIntoView({inline:"center",block:"nearest"})}
+function listForm(){return`<div class="card form" style="padding:14px"><div class="seg" id="ltype"><button class="on" data-t="url">URL M3U</button><button data-t="xc">Xtream</button><button data-t="file">Archivo</button></div>
+<div id="f-url"><label>Nombre</label><input id="lname" placeholder="Mi lista"><label>URL de la lista (.m3u / .m3u8)</label><input id="lurl" placeholder="http://…" inputmode="url"></div>
+<div id="f-xc" hidden><label>Nombre</label><input id="xname" placeholder="Mi servidor"><label>Servidor</label><input id="xsrv" placeholder="http://servidor:puerto" inputmode="url"><label>Usuario</label><input id="xusr"><label>Contraseña</label><input id="xpwd" type="password"></div>
+<div id="f-file" hidden><p class="mut">Elige un archivo .m3u guardado en tu teléfono.</p></div>
+<button class="btn full" style="margin-top:14px" id="ladd">➕ Agregar lista</button><p class="mut" style="font-size:11px;margin:10px 2px 0">Usa solo listas a las que tengas derecho. La app no incluye canales.</p></div>`}
+function bindForm(){let t="url";$("#ltype").onclick=e=>{const b=e.target.closest("button");if(!b)return;t=b.dataset.t;$("#ltype").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x==b));["url","xc","file"].forEach(k=>$("#f-"+k).hidden=k!=t)};
+$("#ladd").onclick=()=>{if(t=="url"){const u=$("#lurl").value.trim();if(!u)return toast("Escribe la URL");addList($("#lname").value.trim(),u)}
+else if(t=="xc"){let s=$("#xsrv").value.trim().replace(/\/+$/,"");const us=$("#xusr").value.trim(),pw=$("#xpwd").value;if(!s||!us)return toast("Completa servidor y usuario");if(!/^https?:/.test(s))s="http://"+s;addList($("#xname").value.trim()||"Xtream",`${s}/get.php?username=${encodeURIComponent(us)}&password=${encodeURIComponent(pw)}&type=m3u_plus&output=m3u8`)}
+else{const f=$("#fileIn");f.value="";f.onchange=async()=>{const file=f.files[0];if(file)addList(file.name.replace(/\.\w+$/,""),"",await file.text())};f.click()}}}
+function manageLists(){openModal("Mis listas",`${LISTS.map(l=>`<div class="card" style="padding:14px"><b>${esc(l.name)}</b><br><small class="mut">${l.ch.length} canales deportivos · ${fechaC(l.at)}</small><div class="row" style="margin-top:10px">${l.url?`<button class="btn s g" onclick="refreshList(${l.id})">🔄 Actualizar</button>`:""}<button class="btn s g" onclick="delList(${l.id})">🗑️ Borrar</button></div></div>`).join("")}<h2>Agregar otra lista</h2>${listForm()}`);bindForm()}
+function refreshList(id){const l=LISTS.find(x=>x.id==id);if(l){closeModal();addList(l.name,l.url)}}
+function delList(id){LISTS=LISTS.filter(x=>x.id!=id);saveLists();closeModal();vIptv();toast("Lista borrada")}
+/* buscar canales para un juego/equipo */
+function findIptv(teams,bcs){const all=allCh();if(!all.length){closeModal();go("iptv");return toast("Primero agrega una lista IPTV")}
+const norm=s=>s.toLowerCase().replace(/[^a-z0-9]/g,"");const terms=[...teams.flatMap(a=>[T[ab(a)]?.k,T[ab(a)]?.n]),...bcs].filter(Boolean).map(norm).filter(x=>x.length>1);
+const hits=all.filter(c=>{const n=norm(c.n);return terms.some(t=>n.includes(t))});
+const nba=all.filter(c=>c.k=="nba"&&!hits.includes(c));
+openModal("Canales sugeridos",(hits.length?`<h2>Coincidencias</h2><div class="card">${hits.slice(0,100).map(chRow).join("")}</div>`:`<div class="empty" style="padding:20px"><b>🔎</b>No encontré canales con esos nombres.</div>`)+(nba.length?`<h2>🏀 Canales NBA</h2><div class="card">${nba.slice(0,150).map(chRow).join("")}</div>`:""))}
+
+/* ============ REPRODUCTOR ============ */
+let hls=null;const V=$("#video");
+function play(url,name){$("#player").classList.add("on");$("#pTitle").textContent=name;$("#pMsg").textContent="Cargando…";stopVideo();
+const isH=/\.m3u8(\?|$)/i.test(url)||/output=m3u8|\/hls\//i.test(url);
+const native=()=>{V.src=url;V.play().catch(()=>{})};
+if(isH&&window.Hls&&Hls.isSupported()){hls=new Hls({enableWorker:true,lowLatencyMode:true});hls.loadSource(url);hls.attachMedia(V);hls.on(Hls.Events.MANIFEST_PARSED,()=>V.play().catch(()=>{}));
+hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal){if(d.type==Hls.ErrorTypes.NETWORK_ERROR&&!hls._r){hls._r=1;hls.startLoad()}else{hls.destroy();hls=null;native()}}})}
+else if(/\.ts(\?|$)/i.test(url)&&window.Hls&&Hls.isSupported()&&!V.canPlayType("video/mp2t")){native()}
+else native()}
+V.addEventListener("playing",()=>$("#pMsg").textContent="");
+V.addEventListener("waiting",()=>$("#pMsg").textContent="Cargando…");
+V.addEventListener("error",()=>{if(!hls)$("#pMsg").textContent="⚠️ No se pudo reproducir este canal. Puede estar caído o en un formato no soportado."});
+function stopVideo(){if(hls){hls.destroy();hls=null}V.pause();V.removeAttribute("src");V.load()}
+function closePlayer(){stopVideo();$("#player").classList.remove("on");if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}
+$("#pClose").onclick=closePlayer;
+$("#pFs").onclick=()=>{const p=$("#player");(document.fullscreenElement?document.exitFullscreen():(V.requestFullscreen||V.webkitEnterFullscreen||p.requestFullscreen).call(V)).catch?.(()=>{})};
+
+/* ============ AJUSTES ============ */
+$("#btnSettings").onclick=()=>{openModal("Ajustes",`<div class="card form" style="padding:14px"><label>Tu equipo favorito (pinta la app con sus colores)</label><select id="sfav"><option value="">— Ninguno —</option>${Object.keys(T).sort((a,b)=>T[a].n.localeCompare(T[b].n)).map(a=>`<option value="${a}" ${a==FAV?"selected":""}>${T[a].n}</option>`).join("")}</select>
+<label>Listas IPTV</label><button class="btn full g" onclick="manageLists()">📺 Administrar listas (${LISTS.length})</button>
+<label>Datos</label><button class="btn full g" onclick="if(confirm('¿Borrar todo?')){localStorage.clear();location.reload()}">🧹 Borrar datos de la app</button></div><p class="mut" style="font-size:11px;text-align:center">NBA en Colores v1.0 · App no oficial, sin relación con la NBA ni sus equipos. Marcadores y noticias: API pública de ESPN.</p>`);
+$("#sfav").onchange=e=>{FAV=e.target.value;LS.set("fav",FAV);applyTheme();toast(FAV?`⭐ ${T[FAV].k}`:"Sin favorito");if(cur=="games")vGames()}};
+
+go("games");
+</script>
+</body>
+</html>
