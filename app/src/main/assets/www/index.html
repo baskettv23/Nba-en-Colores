@@ -375,7 +375,9 @@ openModal("Canales sugeridos",(hits.length?`<h2>Coincidencias</h2><div class="ca
 
 /* ============ REPRODUCTOR ============ */
 let hls=null;const V=$("#video");
-function play(url,name){$("#player").classList.add("on");$("#pTitle").textContent=name;$("#pMsg").textContent="Cargando…";stopVideo();
+const NATIVE=!!(window.Android&&Android.play);
+function play(url,name){if(NATIVE&&LS.get("player","exo")=="exo"){try{Android.play(url,name);return}catch(e){}}webPlay(url,name)}
+function webPlay(url,name){$("#player").classList.add("on");$("#pTitle").textContent=name;$("#pMsg").textContent="Cargando…";stopVideo();
 const isH=/\.m3u8(\?|$)/i.test(url)||/output=m3u8|\/hls\//i.test(url);
 const native=()=>{V.src=url;V.play().catch(()=>{})};
 if(isH&&window.Hls&&Hls.isSupported()){hls=new Hls({enableWorker:true,lowLatencyMode:true});hls.loadSource(url);hls.attachMedia(V);hls.on(Hls.Events.MANIFEST_PARSED,()=>V.play().catch(()=>{}));
@@ -393,8 +395,32 @@ $("#pFs").onclick=()=>{const p=$("#player");(document.fullscreenElement?document
 /* ============ AJUSTES ============ */
 $("#btnSettings").onclick=()=>{openModal("Ajustes",`<div class="card form" style="padding:14px"><label>Tu equipo favorito (pinta la app con sus colores)</label><select id="sfav"><option value="">— Ninguno —</option>${Object.keys(T).sort((a,b)=>T[a].n.localeCompare(T[b].n)).map(a=>`<option value="${a}" ${a==FAV?"selected":""}>${T[a].n}</option>`).join("")}</select>
 <label>Listas IPTV</label><button class="btn full g" onclick="manageLists()">📺 Administrar listas (${LISTS.length})</button>
+<label>Reproductor IPTV</label><select id="splayer" ${NATIVE?"":"disabled"}><option value="exo" ${LS.get("player","exo")=="exo"?"selected":""}>ExoPlayer (nativo, recomendado)</option><option value="web" ${LS.get("player","exo")=="web"?"selected":""}>Reproductor web</option></select>
+<label>Actualizaciones</label><div class="card" style="background:var(--card2);padding:12px;margin:0"><div class="row"><div style="flex:1"><b>Versión ${NATIVE?esc(Android.versionName()):"web"}</b><br><small class="mut" id="upInfo">Se instala encima, sin borrar la app.</small></div></div><div id="upBar" style="height:6px;border-radius:3px;background:#0b0f1a;margin:10px 0;overflow:hidden;display:none"><i style="display:block;height:100%;width:0;background:var(--ok);transition:width .2s"></i></div><button class="btn full" id="upBtn" onclick="checkUpdate(true)">🔄 Buscar actualización</button></div>
 <label>Datos</label><button class="btn full g" onclick="if(confirm('¿Borrar todo?')){localStorage.clear();location.reload()}">🧹 Borrar datos de la app</button></div><p class="mut" style="font-size:11px;text-align:center">NBA en Colores v1.0 · App no oficial, sin relación con la NBA ni sus equipos. Marcadores y noticias: API pública de ESPN.</p>`);
+const sp=$("#splayer");if(sp)sp.onchange=e=>{LS.set("player",e.target.value);toast(e.target.value=="exo"?"▶️ Usando ExoPlayer":"▶️ Usando reproductor web")};
 $("#sfav").onchange=e=>{FAV=e.target.value;LS.set("fav",FAV);applyTheme();toast(FAV?`⭐ ${T[FAV].k}`:"Sin favorito");if(cur=="games")vGames()}};
+
+/* ============ ACTUALIZACIONES ============ */
+const REPO="baskettv23/nba-en-colores";let UPD=null;
+async function checkUpdate(manual){if(!NATIVE||!Android.versionCode){if(manual)toast("Solo disponible en la APK");return}
+const info=$("#upInfo");if(manual&&info)info.textContent="Buscando…";
+try{const r=await fetch(`https://api.github.com/repos/${REPO}/releases/latest`,{cache:"no-store"});if(!r.ok)throw new Error("HTTP "+r.status);const d=await r.json();
+const n=+String(d.tag_name||"").split(".").pop()||0,cur=Android.versionCode();const asset=(d.assets||[]).find(a=>/\.apk$/i.test(a.name));LS.set("upchk",Date.now());
+if(n>cur&&asset){UPD={v:d.tag_name,url:asset.browser_download_url,notes:d.body||""};showUpdate()}
+else if(manual){if(info)info.textContent="✅ Tienes la última versión";toast("Ya tienes la última versión")}}
+catch(e){if(manual){if(info)info.textContent="No se pudo comprobar ("+(e.message||"sin conexión")+")";toast("No se pudo buscar actualización")}}}
+function showUpdate(){if(!UPD)return;const info=$("#upInfo"),btn=$("#upBtn");
+if(info&&btn){info.innerHTML=`🆕 Nueva versión <b>${esc(UPD.v)}</b> disponible`;btn.textContent="⬇️ Descargar e instalar";btn.onclick=doUpdate;return}
+if(!$("#upBanner")){const b=document.createElement("div");b.id="upBanner";b.className="card";b.style.cssText="padding:12px 14px;display:flex;gap:10px;align-items:center;background:linear-gradient(110deg,#166534,#15803d)";b.innerHTML=`<div style="flex:1"><b>🆕 Actualización ${esc(UPD.v)}</b><br><small>Se instala encima de la que tienes</small></div><button class="btn s" onclick="doUpdate()">Actualizar</button>`;$("#view").prepend(b)}}
+function doUpdate(){if(!UPD)return;const bar=$("#upBar");if(bar)bar.style.display="block";toast("⬇️ Descargando actualización…");Android.installUpdate(UPD.url)}
+window.onUpdate=function(p){const bar=$("#upBar"),info=$("#upInfo"),bn=$("#upBanner small");const say=t=>{if(info)info.textContent=t;if(bn)bn.textContent=t};
+if(p>=0&&p<=100){if(bar)bar.firstElementChild.style.width=p+"%";say(`Descargando… ${p}%`)}
+else if(p==101){say("Abriendo instalador… toca «Actualizar»")}
+else if(p==-2){say("Activa «Permitir de esta fuente» y vuelve a tocar Actualizar");toast("Permite instalar desde esta app y vuelve a intentar")}
+else{say("❌ Falló la descarga. Revisa tu conexión.");toast("Falló la actualización")}};
+// Revisa sola cada 6 horas al abrir la app
+if(NATIVE&&Date.now()-LS.get("upchk",0)>6*3600e3)setTimeout(()=>checkUpdate(false),2500);
 
 go("games");
 </script>

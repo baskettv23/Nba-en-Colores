@@ -2,6 +2,9 @@ plugins {
     id 'com.android.application'
 }
 
+// En GitHub Actions cada compilación sube el número de versión automáticamente
+def runNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1") as Integer
+
 android {
     namespace 'com.nbaencolores.app'
     compileSdk 34
@@ -10,16 +13,32 @@ android {
         applicationId 'com.nbaencolores.app'
         minSdk 24
         targetSdk 34
-        versionCode 1
-        versionName '1.0'
+        versionCode runNumber
+        versionName "1.0.${runNumber}"
+    }
+
+    // Llave fija: todas las versiones se firman igual, así se actualiza sin borrar la anterior
+    signingConfigs {
+        release {
+            storeFile file('nba-release.jks')
+            storePassword 'nbaencolores'
+            keyAlias 'nba'
+            keyPassword 'nbaencolores'
+        }
     }
 
     buildTypes {
         release {
             minifyEnabled false
-            // Firmada con la llave de depuración para que se pueda instalar directo
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
         }
+        debug {
+            signingConfig signingConfigs.release
+        }
+    }
+
+    buildFeatures {
+        buildConfig true
     }
 
     compileOptions {
@@ -31,4 +50,12 @@ android {
         abortOnError false
         checkReleaseBuilds false
     }
+}
+
+dependencies {
+    def media3 = '1.4.1'
+    implementation "androidx.media3:media3-exoplayer:$media3"
+    implementation "androidx.media3:media3-exoplayer-hls:$media3"
+    implementation "androidx.media3:media3-datasource:$media3"
+    implementation "androidx.media3:media3-ui:$media3"
 }

@@ -6,7 +6,10 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
+import android.webkit.JavascriptInterface;
 import android.view.View;
 import android.view.WindowManager;
 import android.webkit.ValueCallback;
@@ -51,6 +54,8 @@ public class MainActivity extends Activity {
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         s.setLoadWithOverviewMode(true);
         s.setUseWideViewPort(true);
+
+        web.addJavascriptInterface(new Bridge(), "Android");
 
         web.setWebViewClient(new WebViewClient() {
             @Override
@@ -101,6 +106,43 @@ public class MainActivity extends Activity {
 
         if (savedInstanceState != null) web.restoreState(savedInstanceState);
         else web.loadUrl("file:///android_asset/www/index.html");
+    }
+
+    /** Puente que la página web usa para el reproductor nativo y las actualizaciones. */
+    private class Bridge {
+        @JavascriptInterface
+        public void play(String url, String title) {
+            Intent i = new Intent(MainActivity.this, PlayerActivity.class);
+            i.putExtra("url", url);
+            i.putExtra("title", title);
+            runOnUiThread(() -> startActivity(i));
+        }
+
+        @JavascriptInterface
+        public int versionCode() { return BuildConfig.VERSION_CODE; }
+
+        @JavascriptInterface
+        public String versionName() { return BuildConfig.VERSION_NAME; }
+
+        @JavascriptInterface
+        public void installUpdate(String apkUrl) {
+            if (Build.VERSION.SDK_INT >= 26 && !getPackageManager().canRequestPackageInstalls()) {
+                // Hay que permitir "instalar apps desconocidas" para esta app una sola vez
+                runOnUiThread(() -> {
+                    try {
+                        startActivity(new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                                Uri.parse("package:" + getPackageName())));
+                    } catch (ActivityNotFoundException ignored) { }
+                });
+                sendUpdate(-2);
+                return;
+            }
+            new Thread(() -> Updater.run(MainActivity.this, apkUrl, MainActivity.this::sendUpdate)).start();
+        }
+    }
+
+    private void sendUpdate(int p) {
+        runOnUiThread(() -> web.evaluateJavascript("window.onUpdate && window.onUpdate(" + p + ")", null));
     }
 
     private void hideBars() {
