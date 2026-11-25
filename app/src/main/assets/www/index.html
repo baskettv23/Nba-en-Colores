@@ -180,14 +180,49 @@ const byId=id=>Object.keys(T).find(k=>T[k].id==id);
 const lum=h=>{h=h.replace("#","");const [r,g,b]=[0,2,4].map(i=>parseInt(h.substr(i,2),16)/255).map(v=>v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4));return .2126*r+.7152*g+.0722*b};
 const fg=h=>lum(h)>.4?"#0b0f1a":"#ffffff";
 
-/* Insignia original: balón estilizado con los colores del equipo (no es el logo oficial) */
-function badge(a,s=44){a=ab(a);const t=tm(a),c1=t.c1,c2=t.c2==t.c1?"#fff":t.c2,f=fg(c1),u=a+Math.random().toString(36).slice(2,6);
-const fs=a.length>3?s*.24:s*.3;
-return `<svg width="${s}" height="${s}" viewBox="0 0 100 100" aria-label="${a}"><defs><radialGradient id="g${u}" cx="35%" cy="30%" r="80%"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></radialGradient><clipPath id="c${u}"><circle cx="50" cy="50" r="44"/></clipPath></defs>
-<circle cx="50" cy="50" r="48" fill="${c2}"/><circle cx="50" cy="50" r="44" fill="${c1}"/>
-<g clip-path="url(#c${u})" stroke="${c2}" stroke-width="3" fill="none" opacity=".55"><path d="M6 50h88M50 6v88"/><path d="M18 14c16 14 16 58 0 72M82 14c-16 14-16 58 0 72"/></g>
-<circle cx="50" cy="50" r="44" fill="url(#g${u})"/>
-<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="system-ui,Arial" font-weight="900" font-size="${fs*100/s}" fill="${f}" stroke="${c1}" stroke-width="4" paint-order="stroke">${a}</text></svg>`}
+/* Emblemas originales inspirados en el apodo de cada equipo (no son los logos oficiales) */
+const ICON={
+ATL:'<path d="M66 20C42 26 30 48 32 78l6-4c0-8 2-16 6-22l10 2-8-6c4-6 8-10 14-13l8 2-6-5c3-6 5-10 4-12z"/><path d="M32 78l-4 6" stroke-width="4" stroke="currentColor"/>',
+BOS:'<circle cx="50" cy="34" r="12"/><circle cx="37" cy="52" r="12"/><circle cx="63" cy="52" r="12"/><path d="M48 58c2 10 0 18-6 24l4 2c6-7 8-16 6-26z"/>',
+BKN:'<path d="M26 26h48l-8 46H34z" fill="none" stroke="currentColor" stroke-width="4"/><path d="M28 38h44M30 50h40M32 62h36M38 26l6 46M50 26v46M62 26l-6 46" fill="none" stroke="currentColor" stroke-width="3"/>',
+CHA:'<path d="M50 22l12 7v14l-12 7-12-7V29zM36 46l12 7v14l-12 7-12-7V53zM64 46l12 7v14l-12 7-12-7V53z" fill="none" stroke="currentColor" stroke-width="4"/>',
+CHI:'<path d="M20 30c4 18 16 26 30 26s26-8 30-26c-6 10-16 14-24 14H44c-8 0-18-4-24-14z"/><rect x="38" y="54" width="24" height="18" rx="9"/>',
+CLE:'<path d="M50 14l6 10v40H44V24z"/><rect x="32" y="64" width="36" height="7" rx="3"/><rect x="46" y="71" width="8" height="12"/><circle cx="50" cy="87" r="4"/>',
+DAL:'<path d="M30 28c-6 26 2 50 20 50s26-24 20-50h-10c4 20 0 38-10 38s-14-18-10-38z"/><circle cx="31" cy="40" r="2.5" fill="#0006"/><circle cx="69" cy="40" r="2.5" fill="#0006"/><circle cx="34" cy="56" r="2.5" fill="#0006"/><circle cx="66" cy="56" r="2.5" fill="#0006"/>',
+DEN:'<path d="M32 28h36l12 14-30 38-30-38z"/><path d="M20 42h60M38 28l-6 14 18 38 18-38-6-14" fill="none" stroke="#0005" stroke-width="2.5"/>',
+DET:'<circle cx="50" cy="50" r="16" fill="none" stroke="currentColor" stroke-width="9"/><g stroke="currentColor" stroke-width="10"><path d="M50 22v10M50 68v10M22 50h10M68 50h10M30 30l7 7M63 63l7 7M70 30l-7 7M37 63l-7 7"/></g>',
+GSW:'<path d="M50 18l28 10v20c0 18-12 30-28 36-16-6-28-18-28-36V28z"/><path d="M50 28v46M36 44h28" stroke="#0005" stroke-width="4"/>',
+HOU:'<path d="M50 14c12 10 16 26 14 44H36c-2-18 2-34 14-44z"/><circle cx="50" cy="36" r="6" fill="#0005"/><path d="M36 50l-10 14 10-2zM64 50l10 14-10-2z"/><path d="M42 62h16l-8 20z" opacity=".8"/>',
+IND:'<path d="M30 20v62" stroke="currentColor" stroke-width="5"/><path d="M32 22h42v32H32z" fill="#fff"/><path d="M32 22h10.5v8H32zM53 22h10.5v8H53zM42.5 30H53v8H42.5zM63.5 30H74v8H63.5zM32 38h10.5v8H32zM53 38h10.5v8H53zM42.5 46H53v8H42.5zM63.5 46H74v8H63.5z" fill="#111"/>',
+LAC:'<circle cx="50" cy="26" r="7" fill="none" stroke="currentColor" stroke-width="5"/><path d="M50 33v46M38 44h24" stroke="currentColor" stroke-width="6"/><path d="M24 60c2 14 12 22 26 22s24-8 26-22l-8 4c-2 8-8 12-18 12s-16-4-18-12z"/>',
+LAL:'<g fill="none" stroke="currentColor" stroke-width="7"><path d="M18 36c8-8 16-8 24 0s16 8 24 0 12-6 16-4"/><path d="M18 54c8-8 16-8 24 0s16 8 24 0 12-6 16-4"/><path d="M18 72c8-8 16-8 24 0s16 8 24 0 12-6 16-4"/></g>',
+MEM:'<ellipse cx="50" cy="62" rx="16" ry="13"/><ellipse cx="30" cy="44" rx="6.5" ry="8"/><ellipse cx="43" cy="34" rx="6.5" ry="8.5"/><ellipse cx="57" cy="34" rx="6.5" ry="8.5"/><ellipse cx="70" cy="44" rx="6.5" ry="8"/>',
+MIA:'<path d="M50 14c4 14 22 22 22 42 0 14-10 26-22 26S28 70 28 56c0-10 6-16 10-20 0 8 4 12 8 12-2-14 2-26 4-34z"/><path d="M50 54c4 6 10 10 10 18 0 6-4 10-10 10s-10-4-10-10c0-6 6-10 10-18z" fill="#0004"/>',
+MIL:'<g fill="none" stroke="currentColor" stroke-width="7"><path d="M46 82V54C34 50 26 40 26 22M30 40l-12-6M36 48l-6-14"/><path d="M54 82V54c12-4 20-14 20-32M70 40l12-6M64 48l6-14"/></g>',
+MIN:'<path d="M60 16c-20 2-34 18-34 36s14 32 32 32c10 0 18-4 24-12-24 4-40-14-36-34 2-10 8-18 14-22z"/><path d="M68 30l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/>',
+NOP:'<path d="M18 50c10-14 30-20 46-10l14-12v44L64 60c-16 10-36 4-46-10z"/><circle cx="34" cy="47" r="3.5" fill="#0006"/>',
+NYK:'<path d="M50 34c-10-8-28-4-28 16 0 18 12 34 22 34 3 0 4-2 6-2s3 2 6 2c10 0 22-16 22-34 0-20-18-24-28-16z"/><path d="M50 34c0-8 2-14 6-18" stroke="currentColor" stroke-width="4" fill="none"/><path d="M54 26c6-8 16-8 20-4-6 6-14 8-20 4z"/>',
+OKC:'<path d="M58 12L28 54h18l-6 34 32-46H54z"/>',
+ORL:'<path d="M28 82L62 40" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><path d="M66 18l4 12 12 4-12 4-4 12-4-12-12-4 12-4zM36 22l2.5 7 7 2.5-7 2.5-2.5 7-2.5-7-7-2.5 7-2.5zM80 56l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/>',
+PHI:'<rect x="46" y="14" width="8" height="8" rx="2"/><path d="M50 20c-14 0-18 12-18 24 0 12-4 18-10 24h56c-6-6-10-12-10-24 0-12-4-24-18-24z"/><path d="M48 30v34" stroke="#0005" stroke-width="3"/><circle cx="50" cy="76" r="7"/>',
+PHX:'<rect x="42" y="18" width="16" height="66" rx="8"/><path d="M42 58H30c-6 0-8-4-8-8V36a5 5 0 0 1 10 0v12h10zM58 50h12V30a5 5 0 0 1 10 0v16c0 6-4 10-10 10H58z"/>',
+POR:'<path d="M10 80l26-40 12 16 14-28 28 52z"/><path d="M56 40l6-12 6 12-6-3z" fill="#fff"/>',
+SAC:'<path d="M20 70l-4-36 18 16 16-26 16 26 18-16-4 36z"/><rect x="20" y="72" width="60" height="9" rx="3"/><circle cx="16" cy="32" r="5"/><circle cx="50" cy="22" r="5"/><circle cx="84" cy="32" r="5"/>',
+SAS:'<path d="M50 12l9 26h27l-22 16 8 26-22-16-22 16 8-26-22-16h27z"/>',
+TOR:'<path d="M50 50c-10 0-16 10-14 20 2 8 8 12 14 12s12-4 14-12c2-10-4-20-14-20z"/><path d="M40 50L24 26c-2-4 3-7 6-4l16 22zM50 46V18c0-5 6-5 6 0v28zM60 50l16-24c2-4-3-7-6-4L54 44z"/>',
+UTA:'<path d="M42 22l32-8v48a10 9 0 1 1-6-8V28l-20 5v35a10 9 0 1 1-6-8z"/>',
+WAS:'<path d="M50 10l26 62H24z"/><ellipse cx="50" cy="74" rx="34" ry="9"/><path d="M50 30l3 8 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1z" fill="#0005"/>'
+};
+const cRatio=(a,b)=>{const x=lum(a),y=lum(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05)};
+function badge(a,s=44){a=ab(a);const t=tm(a),c1=t.c1,c2=t.c2,u=a+Math.random().toString(36).slice(2,6);
+const ic=(typeof ICON!=="undefined"&&ICON[a])||"";
+const col=cRatio(c1,c2)>=3.6?c2:fg(c1);const ring=c2==c1?"#fff":c2;
+const inner=ic?`<g transform="translate(18 18) scale(.64)" fill="${col}" color="${col}" stroke-linejoin="round" stroke-linecap="round" style="filter:drop-shadow(0 2px 1.5px #0007)">${ic}</g>`
+:`<text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="system-ui,Arial" font-weight="900" font-size="30" fill="${fg(c1)}">${a}</text>`;
+return `<svg width="${s}" height="${s}" viewBox="0 0 100 100" aria-label="${esc(t.n||a)}"><defs><radialGradient id="g${u}" cx="35%" cy="28%" r="80%"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".25"/></radialGradient><clipPath id="c${u}"><circle cx="50" cy="50" r="44"/></clipPath></defs>
+<circle cx="50" cy="50" r="48" fill="${ring}"/><circle cx="50" cy="50" r="44" fill="${c1}"/>
+<g clip-path="url(#c${u})" stroke="${ring}" stroke-width="2.5" fill="none" opacity=".28"><path d="M6 50h88M50 6v88"/><path d="M18 14c16 14 16 58 0 72M82 14c-16 14-16 58 0 72"/></g>
+<circle cx="50" cy="50" r="44" fill="url(#g${u})"/>${inner}</svg>`}
 
 /* ============ UTILIDADES ============ */
 const $=s=>document.querySelector(s);
